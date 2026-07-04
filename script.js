@@ -4,11 +4,11 @@ document.addEventListener("DOMContentLoaded", () => {
 const loader = document.getElementById("loader");
 
 window.addEventListener("load", () => {
-    if(loader){
+    if (loader) {
         loader.style.opacity = "0";
         setTimeout(() => {
             loader.style.display = "none";
-        },600);
+        }, 600);
     }
 });
 
@@ -16,8 +16,8 @@ window.addEventListener("load", () => {
 const header = document.querySelector("header");
 
 window.addEventListener("scroll", () => {
-    if(header){
-        header.classList.toggle("active",window.scrollY > 80);
+    if (header) {
+        header.classList.toggle("active", window.scrollY > 80);
     }
 });
 
@@ -25,266 +25,187 @@ window.addEventListener("scroll", () => {
 const menuBtn = document.querySelector(".menu-btn");
 const navLinks = document.querySelector(".nav-links");
 
-if(menuBtn && navLinks){
-
-    menuBtn.onclick = ()=>{
-
+if (menuBtn && navLinks) {
+    menuBtn.onclick = () => {
         navLinks.classList.toggle("show");
-
-    }
-
+    };
 }
 
 /*================ MENU SYSTEM ================*/
 
 const categoryBox = document.getElementById("categoryBox");
-
 const products = document.querySelectorAll(".product-card");
-
 const branches = document.querySelectorAll(".branch-btn");
 
-let activeBranch="main";
-let activeCategory="all";
+let activeBranch = "main";
+let activeCategory = "all";
 
-/* المجموعات الخاصة بكل فرع */
+/*================ CATEGORIES =================*/
 
-const categories={
-
-main:[
-["cold_drinks","Cold Drinks"],
-["hot_drinks","Hot Drinks"],
-["sweets","Sweets"],
-["shisha","Shisha"]
-],
-
-branch2:[
-["broasted","Broasted"],
-["sandwich","Sandwich"],
-["snack","Snack"]
-],
-
-branch3:[
-["appetizers","Appetizers"],
-["مشاوي","مشاوي"],
-["offers","Offers"]
-]
-
+const categories = {
+    main: [
+        ["all", "All"],
+        ["hot_drinks", "Hot Drinks"],
+        ["cold_drinks", "Cold Drinks"],
+        ["special", "Special"],
+        ["smoothie", "Smoothies"],
+        ["milkshake", "Milkshakes"],
+        ["frappe", "Frappes"],
+        ["sweets", "Sweets"],
+        ["shisha", "Shisha"]
+    ]
 };
 
-/* إنشاء أزرار المجموعات */
+/*================ CREATE FILTER BUTTONS =================*/
 
-function createCategories(branch){
+function createCategories(branch) {
+    categoryBox.innerHTML = "";
 
-    categoryBox.innerHTML="";
+    categories[branch].forEach((cat, index) => {
 
-    categories[branch].forEach((cat,index)=>{
+        const btn = document.createElement("button");
+        btn.className = "filter-btn";
+        btn.dataset.filter = cat[0];
+        btn.innerHTML = cat[1];
 
-        const btn=document.createElement("button");
-
-        btn.className="filter-btn";
-
-        if(index==0){
-
+        if (index === 0) {
             btn.classList.add("active");
-
-            activeCategory=cat[0];
-
+            activeCategory = "all";
         }
 
-        btn.dataset.filter=cat[0];
+        btn.onclick = () => {
 
-        btn.innerHTML=cat[1];
-
-        btn.onclick=function(){
-
-            document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+            document.querySelectorAll(".filter-btn")
+                .forEach(b => b.classList.remove("active"));
 
             btn.classList.add("active");
-
-            activeCategory=cat[0];
+            activeCategory = cat[0];
 
             filterProducts();
-
-        }
+        };
 
         categoryBox.appendChild(btn);
-
     });
-
 }
 
-/* فلترة المنتجات */
+/*================ FILTER PRODUCTS =================*/
 
-function filterProducts(){
+function filterProducts() {
 
-    products.forEach(product=>{
+    products.forEach(product => {
 
-        const sameBranch=
-        product.dataset.branch===activeBranch;
+        const sameBranch =
+            product.dataset.branch === activeBranch;
 
-        const sameCategory=
-        product.dataset.category===activeCategory;
+        const sameCategory =
+            activeCategory === "all" ||
+            product.dataset.category === activeCategory;
 
-        if(sameBranch && sameCategory){
-
-            product.style.display="block";
-
-        }else{
-
-            product.style.display="none";
-
+        if (sameBranch && sameCategory) {
+            product.style.display = "block";
+        } else {
+            product.style.display = "none";
         }
-
     });
-
 }
 
-/* تغيير الفرع */
+/*================ BRANCH SYSTEM =================*/
 
-branches.forEach(btn=>{
+branches.forEach(btn => {
 
-    btn.onclick=function(){
+    btn.onclick = function () {
 
-        branches.forEach(b=>b.classList.remove("active"));
-
+        branches.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
 
-        activeBranch=btn.dataset.branch;
+        activeBranch = btn.dataset.branch;
+        activeCategory = "all";
 
         createCategories(activeBranch);
-
         filterProducts();
-
-    }
-
+    };
 });
 
-/* أول تشغيل */
+/*================ INIT =================*/
 
 createCategories(activeBranch);
-
 filterProducts();
 
-/*================ CART ================*/
+/* Add to cart */
+document.querySelectorAll(".add-cart").forEach((btn, index) => {
 
-let cart=[];
+    btn.onclick = function () {
 
-const cartCount=document.getElementById("cartCount");
+        const name = btn.dataset.name;
 
-function updateCart(){
+        const existing = cart.find(item => item.name === name);
 
-    if(cartCount){
-
-        cartCount.innerHTML=cart.length;
-
-    }
-
-}
-
-document.querySelectorAll(".add-cart").forEach(btn=>{
-
-    btn.onclick=function(){
-
-        cart.push({
-
-            id:btn.dataset.id,
-
-            name:btn.dataset.name,
-
-            price:btn.dataset.price,
-
-            image:btn.dataset.image
-
-        });
+        if (existing) {
+            existing.qty = (existing.qty || 1) + 1;
+        } else {
+            cart.push({
+                id: index + 1,
+                name: name,
+                price: Number(btn.dataset.price),
+                image: btn.dataset.image,
+                qty: 1
+            });
+        }
 
         updateCart();
-
-        showToast(btn.dataset.name);
-
-    }
-
+        showToast(name);
+    };
 });
 
 /*================ TOAST ================*/
 
-function showToast(name){
-
-    const toast=document.createElement("div");
-
-    toast.className="toast";
-
-    toast.innerHTML="✔ "+name+" Added";
+function showToast(name) {
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerHTML = "✔ " + name + " Added";
 
     document.body.appendChild(toast);
 
-    setTimeout(()=>{
+    setTimeout(() => toast.classList.add("show"), 100);
 
-        toast.classList.add("show");
-
-    },100);
-
-    setTimeout(()=>{
-
-        toast.remove();
-
-    },2500);
-
+    setTimeout(() => toast.remove(), 2500);
 }
 
 /*================ LANGUAGE ================*/
 
-const languageBtn=document.getElementById("languageBtn");
+const languageBtn = document.getElementById("languageBtn");
 
-if(languageBtn){
+if (languageBtn) {
+    let lang = "en";
 
-    let lang="en";
+    languageBtn.onclick = function () {
+        lang = lang === "en" ? "ar" : "en";
 
-    languageBtn.onclick=function(){
-
-        lang=lang==="en"?"ar":"en";
-
-        languageBtn.innerHTML=
-
-        lang==="en"
-
-        ?"🇺🇸 EN"
-
-        :"🇸🇦 AR";
-
-    }
-
+        languageBtn.innerHTML =
+            lang === "en"
+                ? "🇺🇸 EN"
+                : "🇸🇦 AR";
+    };
 }
 
 /*================ BACK TO TOP ================*/
 
-const topBtn=document.getElementById("topBtn");
+const topBtn = document.getElementById("topBtn");
 
-if(topBtn){
-
-    window.addEventListener("scroll",()=>{
-
-        topBtn.style.display=
-
-        window.scrollY>400
-
-        ?"block"
-
-        :"none";
-
+if (topBtn) {
+    window.addEventListener("scroll", () => {
+        topBtn.style.display =
+            window.scrollY > 400
+                ? "block"
+                : "none";
     });
 
-    topBtn.onclick=function(){
-
+    topBtn.onclick = function () {
         window.scrollTo({
-
-            top:0,
-
-            behavior:"smooth"
-
+            top: 0,
+            behavior: "smooth"
         });
-
-    }
-
+    };
 }
 
 });
