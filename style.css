@@ -1715,3 +1715,64 @@ opacity:1;
     background:#D4AF37;
     color:#07141D;
 }
+@media (max-width: 768px) {
+
+    /* grid يصبح عمود واحد */
+    .best-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+        padding: 10px;
+    }
+
+    /* card شكل أجمل */
+    .product-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 12px;
+        border-radius: 18px;
+    }
+
+    .product-card img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 15px;
+    }
+
+    .product-info {
+        flex: 1;
+        padding-left: 12px;
+    }
+
+    .product-info h3 {
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .product-info p {
+        font-size: 12px;
+        opacity: 0.8;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* buttons أصغر */
+    .add-cart {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    /* الفلاتر */
+    .filter-btn {
+        font-size: 12px;
+        padding: 8px 10px;
+        margin: 3px;
+        border-radius: 20px;
+    }
+}
