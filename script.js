@@ -4,19 +4,21 @@ document.addEventListener("DOMContentLoaded", () => {
 const loader = document.getElementById("loader");
 
 window.addEventListener("load", () => {
-    if (loader) {
-        loader.style.opacity = "0";
-        setTimeout(() => loader.style.display = "none", 600);
-    }
+    if (!loader) return;
+
+    loader.style.opacity = "0";
+    setTimeout(() => {
+        loader.style.display = "none";
+    }, 600);
 });
 
 /*================ HEADER ================*/
 const header = document.querySelector("header");
 
 window.addEventListener("scroll", () => {
-    if (header) {
-        header.classList.toggle("active", window.scrollY > 80);
-    }
+    if (!header) return;
+
+    header.classList.toggle("active", window.scrollY > 80);
 });
 
 /*================ MOBILE MENU ================*/
@@ -32,6 +34,7 @@ if (menuBtn && navLinks) {
 /*================ MENU SYSTEM ================*/
 
 const categoryBox = document.getElementById("categoryBox");
+const products = document.querySelectorAll(".product-card");
 const branches = document.querySelectorAll(".branch-btn");
 
 let activeBranch = "main";
@@ -56,26 +59,18 @@ const categories = {
         ["all", "All"],
         ["shawarma", "Shawarma"],
         ["meals", "Meals"],
-        ["sandwich", "Sandwiches"],
         ["broasted", "Broasted"],
-        ["snack", "Snacks"]
+        ["sandwich", "Sandwiches"],
+        ["snacks", "Snacks"]
     ],
 
     branch3: [
         ["all", "All"],
         ["appetizers", "Appetizers"],
-        ["grill", "Grills"],
+        ["grills", "Grills"],
         ["offers", "Offers"]
     ]
 };
-
-/*================ PRODUCTS (IMPORTANT FIX) ================*/
-function getProducts() {
-    return document.querySelectorAll(".product-card");
-}
-
-/*================ CREATE CATEGORIES =================*/
-
 function createCategories(branch) {
 
     categoryBox.innerHTML = "";
@@ -85,11 +80,15 @@ function createCategories(branch) {
     categories[branch].forEach((cat, index) => {
 
         const btn = document.createElement("button");
+
         btn.className = "filter-btn";
         btn.dataset.filter = cat[0];
         btn.textContent = cat[1];
 
-        if (index === 0) activeCategory = "all";
+        if (index === 0) {
+            btn.classList.add("active");
+            activeCategory = "all";
+        }
 
         btn.addEventListener("click", () => {
 
@@ -106,42 +105,29 @@ function createCategories(branch) {
         categoryBox.appendChild(btn);
     });
 }
-
-/*================ FILTER (FIXED + SEARCH COMPATIBLE) =================*/
-
 function filterProducts() {
 
-    const searchInput = document.getElementById("searchInput");
-    const searchValue = searchInput ? searchInput.value.toLowerCase() : "";
+    products.forEach(product => {
 
-    getProducts().forEach(product => {
-
-        const matchBranch = product.dataset.branch === activeBranch;
+        const matchBranch =
+            product.dataset.branch === activeBranch;
 
         const matchCategory =
             activeCategory === "all" ||
             product.dataset.category === activeCategory;
 
-        const title = product.querySelector("h3")?.textContent.toLowerCase() || "";
-
-        const matchSearch = title.includes(searchValue);
-
-        product.style.display =
-            (matchBranch && matchCategory && matchSearch)
-                ? "block"
-                : "none";
+        if (matchBranch && matchCategory) {
+            product.style.display = "";
+        } else {
+            product.style.display = "none";
+        }
     });
 }
-
-/*================ BRANCH SYSTEM =================*/
-
-const branchesBtns = document.querySelectorAll(".branch-btn");
-
-branchesBtns.forEach(btn => {
+branches.forEach(btn => {
 
     btn.addEventListener("click", () => {
 
-        branchesBtns.forEach(b => b.classList.remove("active"));
+        branches.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
 
         activeBranch = btn.dataset.branch;
@@ -151,56 +137,61 @@ branchesBtns.forEach(btn => {
         filterProducts();
     });
 });
-
-/*================ INIT =================*/
-
-createCategories(activeBranch);
-filterProducts();
-
-/*================ CART SYSTEM =================*/
-
 let cart = [];
+
 const cartCount = document.getElementById("cartCount");
 
+/*================ LOAD CART =================*/
+function loadCart() {
+    const saved = localStorage.getItem("opss_cart");
+
+    if (saved) {
+        try {
+            cart = JSON.parse(saved) || [];
+        } catch (e) {
+            cart = [];
+        }
+    }
+
+    updateCart();
+}
+
+/*================ SAVE CART =================*/
 function saveCart() {
     localStorage.setItem("opss_cart", JSON.stringify(cart));
 }
 
-function loadCart() {
-    const saved = localStorage.getItem("opss_cart");
-    if (saved) cart = JSON.parse(saved);
-    updateCart();
-}
-
+/*================ UPDATE CART =================*/
 function updateCart() {
+
     if (!cartCount) return;
 
-    const total = cart.reduce((sum, item) => sum + item.qty, 0);
+    const total = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+
     cartCount.textContent = total;
 
     saveCart();
 }
 
 loadCart();
-
-/*================ ADD TO CART =================*/
-
-document.querySelectorAll(".add-cart").forEach((btn, index) => {
+document.querySelectorAll(".add-cart").forEach((btn) => {
 
     btn.addEventListener("click", () => {
 
         const name = btn.dataset.name;
+        const price = Number(btn.dataset.price) || 0;
+        const image = btn.dataset.image || "";
 
         let item = cart.find(p => p.name === name);
 
         if (item) {
-            item.qty++;
+            item.qty += 1;
         } else {
             cart.push({
-                id: index + 1,
+                id: Date.now(), // 🔥 حل مشكلة id المتكرر
                 name,
-                price: Number(btn.dataset.price),
-                image: btn.dataset.image || "",
+                price,
+                image,
                 qty: 1
             });
         }
@@ -209,10 +200,35 @@ document.querySelectorAll(".add-cart").forEach((btn, index) => {
         showToast(name);
 
     });
+
 });
+const searchInput = document.getElementById("searchInput");
 
-/*================ TOAST =================*/
+if (searchInput) {
 
+    searchInput.addEventListener("keyup", function () {
+
+        const value = this.value.toLowerCase();
+
+        products.forEach(product => {
+
+            const title = product.querySelector("h3")?.textContent?.toLowerCase() || "";
+
+            const matchText = title.includes(value);
+
+            const matchBranch = product.dataset.branch === activeBranch;
+            const matchCategory =
+                activeCategory === "all" ||
+                product.dataset.category === activeCategory;
+
+            if (matchText && matchBranch && matchCategory) {
+                product.style.display = "";
+            } else {
+                product.style.display = "none";
+            }
+        });
+    });
+}
 function showToast(name) {
 
     const old = document.querySelector(".toast");
@@ -232,54 +248,9 @@ function showToast(name) {
 
     setTimeout(() => {
         toast.classList.remove("show");
+
         setTimeout(() => toast.remove(), 300);
+
     }, 2000);
 }
-
-/*================ SEARCH =================*/
-
-const searchInput = document.getElementById("searchInput");
-
-if (searchInput) {
-    searchInput.addEventListener("input", () => {
-        filterProducts();
-    });
-}
-
-/*================ LANGUAGE =================*/
-
-const languageBtn = document.getElementById("languageBtn");
-
-if (languageBtn) {
-
-    let lang = "en";
-
-    languageBtn.addEventListener("click", () => {
-
-        lang = lang === "en" ? "ar" : "en";
-
-        languageBtn.textContent =
-            lang === "en" ? "🇺🇸 EN" : "🇸🇦 AR";
-
-        document.documentElement.lang = lang;
-    });
-}
-
-/*================ BACK TO TOP =================*/
-
-const topBtn = document.getElementById("topBtn");
-
-if (topBtn) {
-
-    window.addEventListener("scroll", () => {
-        topBtn.classList.toggle("show", window.scrollY > 300);
-    });
-
-    topBtn.addEventListener("click", () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-}
-
-/*================ END =================*/
-
 });
