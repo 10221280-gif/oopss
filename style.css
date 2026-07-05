@@ -1932,34 +1932,59 @@ opacity:1;
 
 /* الهواتف الصغيرة */
 
-@media (max-width:430px){
+@media (max-width:768px){
 
-    .best-grid{
+.best-grid{
 
-        grid-template-columns:repeat(3,minmax(0,1fr));
+display:grid;
 
-        gap:10px;
+grid-template-columns:repeat(2,minmax(0,1fr));
 
-    }
+gap:15px;
 
-    .product-info h3{
+padding:15px;
 
-        font-size:11px;
+}
 
-    }
+.product-card{
 
-    .price-row span{
+border-radius:18px;
 
-        font-size:12px;
+padding:10px;
 
-    }
+}
 
-    .add-cart{
+.product-card img{
 
-        width:30px;
+width:100%;
 
-        height:30px;
+aspect-ratio:1/1;
 
-    }
+object-fit:cover;
+
+border-radius:14px;
+
+}
+
+.product-info h3{
+
+font-size:14px;
+
+min-height:38px;
+
+}
+
+.product-info p{
+
+display:none;
+
+}
+
+.price-row{
+
+margin-top:10px;
+
+}
+
 
 }
