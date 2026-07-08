@@ -94,11 +94,17 @@ main:[
 
 ["all","All"],
 
+["breakfast","Breakfast"],
+
 ["hot_drinks","Hot Drinks"],
 
 ["cold_drinks","Cold Drinks"],
 
-["sweets","Desserts"],
+["desserts","Desserts"],
+
+["crepe","Crepe"],
+
+["icecream","Icecream"],
 
 ["special","Special"],
 
@@ -116,7 +122,7 @@ branch2:[
 
 ["shawarma","Shawarma"],
 
-["meals","Meals"],
+["burger","Burger"],
 
 ["broasted","Broasted"],
 
