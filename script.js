@@ -138,11 +138,11 @@ branch3:[
 
 ["all","All"],
 
-["appetizers","Appetizers"],
+["مقبلات","مقبلات"],
 
-["مشاوي","Grills"],
+["grilled","Grilled"],
 
-["offers","Offers"]
+["مقلي","مقلي"]
 
 ]
 
